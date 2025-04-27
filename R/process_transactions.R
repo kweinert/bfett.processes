@@ -22,7 +22,7 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 	if(is.character(transactions)) {
 		stopifnot(length(transactions)==1, file.exists(transactions))
 		if(is.null(seeds)) seeds <- dirname(transactions)
-		transactions <- read.csv(transactions, na.strings="")
+		transactions <- utils::read.csv(transactions, na.strings="")
 	}
 	stopifnot(is.data.frame(transactions), nrow(transactions)>0)
 	req_cn <- c("isin", "date", "size", "amount", "type", "portfolio")
@@ -39,7 +39,7 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 	one_portf_cash <- function(dat) {
 		the_sign <- c(deposit=1, buy=-1, other=1, sell=1, withdraw=-1)
 		ans <- transform(dat, cash = amount*the_sign[type]) |>
-			aggregate(cash ~ date, data=_, FUN=sum) 
+			stats::aggregate(cash ~ date, data=_, FUN=sum) 
 		ans[order(ans[["date"]]),] |>
 			transform(cash=cumsum(cash), portfolio=dat[1,"portfolio"])
 	}
@@ -79,9 +79,9 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 			}
 			j_remain <- open_pos[[isin]][j,"size"] - ans[j, "size"]
 			if(j_remain<0.00000001)
-				open_pos[[isin]] <<- tail(open_pos[[isin]], -j)
+				open_pos[[isin]] <<- utils::tail(open_pos[[isin]], -j)
 			else {
-				open_pos[[isin]] <<- tail(open_pos[[isin]], -j+1)
+				open_pos[[isin]] <<- utils::tail(open_pos[[isin]], -j+1)
 				open_pos[[isin]][1,"size"] <<- j_remain
 			}
 			#browser()
@@ -115,9 +115,9 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 	rownames(closed_trades) <- NULL
 
 	# write result
-	write.csv(x=cash, file=file.path(seeds, "cash.csv"), na="", row.names=FALSE)
-	write.csv(x=active_positions, file=file.path(seeds, "active_positions.csv"), na="", row.names=FALSE)
-	write.csv(x=closed_trades, file=file.path(seeds, "closed_trades.csv"), na="", row.names=FALSE)
+	utils::write.csv(x=cash, file=file.path(seeds, "cash.csv"), na="", row.names=FALSE)
+	utils::write.csv(x=active_positions, file=file.path(seeds, "active_positions.csv"), na="", row.names=FALSE)
+	utils::write.csv(x=closed_trades, file=file.path(seeds, "closed_trades.csv"), na="", row.names=FALSE)
 	
 }
 

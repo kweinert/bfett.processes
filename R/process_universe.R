@@ -5,6 +5,7 @@
 #'
 #' @param univ_pdf path to LS trade universum
 #' @param seeds character, path to seeds folder of the dbt project, default dirname(transactions)
+#' @param verbose, logical, print diagnostic messages
 #' @return NULL, used for its side effects
 #' @export
 process_universe <- function(univ_pdf, seeds, verbose=FALSE) {
@@ -21,11 +22,11 @@ process_universe <- function(univ_pdf, seeds, verbose=FALSE) {
 		if(length(i)==0) return(data.table::data.table())
 		
 		# header vs. content
-		content <- tail(pg, -i)
+		content <- utils::tail(pg, -i)
 		content <- content[!grepl("^\\S*$", content)]
 		header <- pg[i]
 		start_pos <- gregexpr("\\S+", header)[[1]]
-		end_pos <- c(tail(start_pos, -1)-1, 300)
+		end_pos <- c(utils::tail(start_pos, -1)-1, 300)
 		n_col <- length(start_pos)
 		header <- sapply(1:n_col, \(i) tolower(trimws(substr(header, start_pos[i], end_pos[i]))))
 		
@@ -63,7 +64,7 @@ process_universe <- function(univ_pdf, seeds, verbose=FALSE) {
 	
 	lapply(all_pages, one_page) |>
 	data.table::rbindlist() |>
-	write.csv(file=file.path(seeds, "isin_info.csv"), na="", row.names=FALSE)
+	utils::write.csv(file=file.path(seeds, "isin_info.csv"), na="", row.names=FALSE)
 
 }
 
