@@ -18,5 +18,5 @@ NULL, used for its side effects
 }
 \description{
 Takes PDF from Lang & Schwarz, i.e. https://www.ls-x.de/media/lsx/stammdaten20250418.pdf
-and converts it to data.fraem
+and converts it to data.frame
 }

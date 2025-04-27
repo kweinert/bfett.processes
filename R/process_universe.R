@@ -1,7 +1,7 @@
 #' Process universe
 #'
 #' Takes PDF from Lang & Schwarz, i.e. https://www.ls-x.de/media/lsx/stammdaten20250418.pdf
-#' and converts it to data.fraem
+#' and converts it to data.frame
 #'
 #' @param univ_pdf path to LS trade universum
 #' @param seeds character, path to seeds folder of the dbt project, default dirname(transactions)
