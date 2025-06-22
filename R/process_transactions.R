@@ -64,13 +64,14 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 			size <- sells[i,"size"]
 			isin <- sells[i,"isin"]
 			j <- 1
-			while (size>sum(open_pos[[isin]][1:j, "size"])) {
+			while (size>sum(open_pos[[isin]][1:j, "size"]) && j<nrow(open_pos[[isin]])) {
 				j <- j + 1
 				if(verbose) {
 					message("    j=", j)
 					Sys.sleep(1)
 				}
 			}
+			if(size-sum(open_pos[[isin]][1:j, "size"]) > 0.00000001) stop("more sold than bought, isin=", isin)
 			ans <- open_pos[[isin]][1:j,c("isin", "buy_price", "buy_date", "size")]
 			if(j==1) {
 				ans[1,"size"] <- size
