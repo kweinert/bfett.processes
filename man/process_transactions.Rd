@@ -4,7 +4,12 @@
 \alias{process_transactions}
 \title{Process transactions}
 \usage{
-process_transactions(transactions, seeds = NULL, verbose = FALSE)
+process_transactions(
+  transactions,
+  seeds = NULL,
+  verbose = FALSE,
+  tol_amount = 1e-05
+)
 }
 \arguments{
 \item{transactions}{data.frame or filename}
@@ -12,6 +17,8 @@ process_transactions(transactions, seeds = NULL, verbose = FALSE)
 \item{seeds}{character, path to seeds folder of the dbt project, default dirname(transactions)}
 
 \item{verbose}{logical, print diagnostic messages}
+
+\item{tol_amount}{numerical, tolerance for position sizes}
 }
 \value{
 NULL, used for its side effects

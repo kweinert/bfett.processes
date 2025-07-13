@@ -15,6 +15,7 @@
 #' @param transactions data.frame or filename
 #' @param seeds character, path to seeds folder of the dbt project, default dirname(transactions)
 #' @param verbose logical, print diagnostic messages
+#' @param tol_amount numerical, tolerance for position sizes
 #' @return NULL, used for its side effects
 #' @export
 process_transactions <- function(transactions, seeds=NULL, verbose=FALSE, tol_amount=0.00001) {
@@ -52,17 +53,25 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE, tol_am
 	one_portf_trades <- function(dat) {
 		sells <- subset(dat, type=="sell") |>
 			transform(sell_date=date, sell_price=amount/size)
-		sells <- sells[order(sells[,"sell_date"], decreasing=TRUE),]
+		sells <- sells[order(sells[,"sell_date"], decreasing=FALSE),]
 			
 		open_pos <- subset(dat, type=="buy") |>
-			transform(buy_date=date, buy_price=amount/size)
+			transform(buy_date=date, buy_price=amount/size, cleared=FALSE) 
 		open_pos <- split(open_pos, open_pos[["isin"]]) |> 
 			lapply(\(x) x[order(x[,"buy_date"]),])
 		
-		one_row <- function(i) {
+	
+		one_sell <- function(i) {
 			size <- sells[i,"size"]
 			isin <- sells[i,"isin"]
 			if(verbose) message("i=", i, ", size=", size, ", isin=", isin)
+			
+			# find out which buys are cleared with this sell.
+			#open_dat <- open_pos[[isin]]
+			
+			#idx <- which(open_dat$buy_date <= sells[i,"sell_date"])
+			#browser()
+			
 			j <- 1
 			while (size>sum(open_pos[[isin]][1:j, "size"]) && j<nrow(open_pos[[isin]])) {
 				j <- j + 1
@@ -79,19 +88,19 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE, tol_am
 				ans[j,"size"] <- size - sum(ans[1:(j-1), "size"])
 			}
 			j_remain <- open_pos[[isin]][j,"size"] - ans[j, "size"]
-			if(j_remain<tol_amount)
+			#browser()
+			if(j_remain<tol_amount) {
 				open_pos[[isin]] <<- utils::tail(open_pos[[isin]], -j)
-			else {
+			} else {
 				open_pos[[isin]] <<- utils::tail(open_pos[[isin]], -j+1)
 				open_pos[[isin]][1,"size"] <<- j_remain
 			}
-			#browser()
 
-			#if(isin=="BTC") browser()
 			merge(ans, sells[i, c("isin", "sell_date", "sell_price")], by="isin")
 		}
+		
 		closed_trades <- if(nrow(sells)>0) 
-			lapply(seq.int(nrow(sells)), one_row) |> 
+			lapply(seq.int(nrow(sells)), one_sell) |> 
 			do.call(what=rbind) |>
 			transform(portfolio=dat[1,"portfolio"])
 		else
