@@ -60,14 +60,14 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE, tol_am
 			lapply(\(x) x[order(x[,"buy_date"]),])
 		
 		one_row <- function(i) {
-			if(verbose) message("i=", i)
 			size <- sells[i,"size"]
 			isin <- sells[i,"isin"]
+			if(verbose) message("i=", i, ", size=", size, ", isin=", isin)
 			j <- 1
 			while (size>sum(open_pos[[isin]][1:j, "size"]) && j<nrow(open_pos[[isin]])) {
 				j <- j + 1
 				if(verbose) {
-					message("    j=", j)
+					message("    j=", j, ", sum(open_pos[[isin]][1:j, 'size'])=", sum(open_pos[[isin]][1:j, "size"]))
 					Sys.sleep(1)
 				}
 			}
