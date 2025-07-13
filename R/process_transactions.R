@@ -56,7 +56,7 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE, tol_am
 		sells <- sells[order(sells[,"sell_date"], decreasing=FALSE),]
 			
 		open_pos <- subset(dat, type=="buy") |>
-			transform(buy_date=date, buy_price=amount/size, cleared=FALSE) 
+			transform(buy_date=date, buy_price=amount/size) 
 		open_pos <- split(open_pos, open_pos[["isin"]]) |> 
 			lapply(\(x) x[order(x[,"buy_date"]),])
 		
