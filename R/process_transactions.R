@@ -17,7 +17,7 @@
 #' @param verbose logical, print diagnostic messages
 #' @return NULL, used for its side effects
 #' @export
-process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
+process_transactions <- function(transactions, seeds=NULL, verbose=FALSE, tol_amout=0.00001) {
 	# validate input
 	if(is.character(transactions)) {
 		stopifnot(length(transactions)==1, file.exists(transactions))
@@ -71,7 +71,7 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 					Sys.sleep(1)
 				}
 			}
-			if(size-sum(open_pos[[isin]][1:j, "size"]) > 0.00000001) stop("more sold than bought, isin=", isin)
+			if(size-sum(open_pos[[isin]][1:j, "size"]) > tol_amout) stop("more sold than bought, isin=", isin)
 			ans <- open_pos[[isin]][1:j,c("isin", "buy_price", "buy_date", "size")]
 			if(j==1) {
 				ans[1,"size"] <- size
@@ -79,7 +79,7 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 				ans[j,"size"] <- size - sum(ans[1:(j-1), "size"])
 			}
 			j_remain <- open_pos[[isin]][j,"size"] - ans[j, "size"]
-			if(j_remain<0.00000001)
+			if(j_remain<tol_amout)
 				open_pos[[isin]] <<- utils::tail(open_pos[[isin]], -j)
 			else {
 				open_pos[[isin]] <<- utils::tail(open_pos[[isin]], -j+1)
@@ -98,7 +98,7 @@ process_transactions <- function(transactions, seeds=NULL, verbose=FALSE) {
 			data.frame()
 		
 		active_positions=do.call(rbind, open_pos) |>
-			subset(size>0.00000001) |>
+			subset(size>tol_amout) |>
 			transform(date=NULL, amount=NULL, type=NULL)
 	    rownames(active_positions) <- NULL
 			
